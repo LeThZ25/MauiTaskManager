@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Task_Manager.ViewModels"
+             xmlns:converters="clr-namespace:Task_Manager.Converters"
+             x:Class="Task_Manager.MainPage"
+             Title="MY TASKS">
+    <ContentPage.Resources>
+        <converters:BoolToStrikethroughConverter x:Key="BoolToStrikethroughConverter"/>
+        <converters:SummaryMultiConverter x:Key="SummaryMultiConverter"/>
+    </ContentPage.Resources>
+
+    <ContentPage.BindingContext>
+        <vm:TasksViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="15">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="10">
+            <Entry x:Name="taskEntry"
+                   Grid.Column="0"
+                   Placeholder="Enter a new task"
+                   Text="{Binding NewTaskTitle, Mode=TwoWay}" />
+
+            <Button Grid.Column="1"
+                    Text="Add"
+                    Command="{Binding AddTaskCommand}"/>
+        </Grid>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Tasks}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="Auto, *" Padding="5">
+                        <CheckBox Grid.Column="0" 
+                                  IsChecked="{Binding IsCompleted, Mode=TwoWay}"/>
+
+                        <Label Grid.Column="1" 
+                               Text="{Binding Title}"
+                               VerticalOptions="Center"
+                               TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToStrikethroughConverter}}"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="5">
+            <BoxView HeightRequest="1" Color="Gray"/>
+
+            <Label FontSize="16" FontAttributes="Bold" HorizontalOptions="Center">
+                <Label.Text>
+                    <MultiBinding Converter="{StaticResource SummaryMultiConverter}">
+                        <Binding Path="CompletedCount"/>
+                        <Binding Path="TotalCount"/>
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
+
+            <Label Text="{Binding Source={x:Reference taskEntry}, Path=Text, StringFormat='Preview: {0}'}"
+                   TextColor="Gray" FontSize="12" HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>
